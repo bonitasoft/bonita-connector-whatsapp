@@ -1,11 +1,12 @@
 {
-  "version": "1.0.0-beta.1",
+  "connector": "bonita-connector-whatsapp",
+  "currentVersion": "1.0.0-beta.1",
   "operations": {
-    "whatsapp-send-template": { "status": "untested", "testedBy": null, "testedDate": null },
-    "whatsapp-send-text": { "status": "untested", "testedBy": null, "testedDate": null },
-    "whatsapp-send-media": { "status": "untested", "testedBy": null, "testedDate": null },
-    "whatsapp-get-status": { "status": "untested", "testedBy": null, "testedDate": null },
-    "whatsapp-list-conversations": { "status": "untested", "testedBy": null, "testedDate": null },
-    "whatsapp-get-messages": { "status": "untested", "testedBy": null, "testedDate": null }
+    "whatsapp-send-template": { "status": "untested", "issue": null, "version": null },
+    "whatsapp-send-text": { "status": "untested", "issue": null, "version": null },
+    "whatsapp-send-media": { "status": "untested", "issue": null, "version": null },
+    "whatsapp-get-status": { "status": "untested", "issue": null, "version": null },
+    "whatsapp-list-conversations": { "status": "untested", "issue": null, "version": null },
+    "whatsapp-get-messages": { "status": "untested", "issue": null, "version": null }
   }
 }

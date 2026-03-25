@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definition:ConnectorDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:definition="http://www.bonitasoft.org/ns/connector/definition/6.1"
-    id="${whatsapp.get-messages.def.id}" version="${whatsapp.get-messages.def.version}">
+    id="${whatsapp-get-messages.def.id}" version="${whatsapp-get-messages.def.version}">
     <icon>whatsapp.png</icon>
     <category icon="whatsapp.png" id="WhatsApp Business"/>
     <input name="permanentToken" type="java.lang.String" mandatory="true"/>

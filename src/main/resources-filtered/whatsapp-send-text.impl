@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <implementation:connectorImplementation xmlns:implementation="http://www.bonitasoft.org/ns/connector/implementation/6.0">
-    <implementationId>${whatsapp.send-text.impl.id}</implementationId>
-    <implementationVersion>${whatsapp.send-text.impl.version}</implementationVersion>
-    <definitionId>${whatsapp.send-text.def.id}</definitionId>
-    <definitionVersion>${whatsapp.send-text.def.version}</definitionVersion>
-    <implementationClassname>${whatsapp.send-text.main-class}</implementationClassname>
+    <implementationId>${whatsapp-send-text.impl.id}</implementationId>
+    <implementationVersion>${whatsapp-send-text.impl.version}</implementationVersion>
+    <definitionId>${whatsapp-send-text.def.id}</definitionId>
+    <definitionVersion>${whatsapp-send-text.def.version}</definitionVersion>
+    <implementationClassname>${whatsapp-send-text.main-class}</implementationClassname>
     <hasSources>false</hasSources>
     <description>WhatsApp Send Text Message connector implementation</description>
     ${connector-dependencies}

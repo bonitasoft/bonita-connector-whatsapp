@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <implementation:connectorImplementation xmlns:implementation="http://www.bonitasoft.org/ns/connector/implementation/6.0">
-    <implementationId>${whatsapp.get-status.impl.id}</implementationId>
-    <implementationVersion>${whatsapp.get-status.impl.version}</implementationVersion>
-    <definitionId>${whatsapp.get-status.def.id}</definitionId>
-    <definitionVersion>${whatsapp.get-status.def.version}</definitionVersion>
-    <implementationClassname>${whatsapp.get-status.main-class}</implementationClassname>
+    <implementationId>${whatsapp-get-status.impl.id}</implementationId>
+    <implementationVersion>${whatsapp-get-status.impl.version}</implementationVersion>
+    <definitionId>${whatsapp-get-status.def.id}</definitionId>
+    <definitionVersion>${whatsapp-get-status.def.version}</definitionVersion>
+    <implementationClassname>${whatsapp-get-status.main-class}</implementationClassname>
     <hasSources>false</hasSources>
     <description>WhatsApp Get Message Status connector implementation</description>
     ${connector-dependencies}

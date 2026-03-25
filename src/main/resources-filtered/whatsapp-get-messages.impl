@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <implementation:connectorImplementation xmlns:implementation="http://www.bonitasoft.org/ns/connector/implementation/6.0">
-    <implementationId>${whatsapp.get-messages.impl.id}</implementationId>
-    <implementationVersion>${whatsapp.get-messages.impl.version}</implementationVersion>
-    <definitionId>${whatsapp.get-messages.def.id}</definitionId>
-    <definitionVersion>${whatsapp.get-messages.def.version}</definitionVersion>
-    <implementationClassname>${whatsapp.get-messages.main-class}</implementationClassname>
+    <implementationId>${whatsapp-get-messages.impl.id}</implementationId>
+    <implementationVersion>${whatsapp-get-messages.impl.version}</implementationVersion>
+    <definitionId>${whatsapp-get-messages.def.id}</definitionId>
+    <definitionVersion>${whatsapp-get-messages.def.version}</definitionVersion>
+    <implementationClassname>${whatsapp-get-messages.main-class}</implementationClassname>
     <hasSources>false</hasSources>
     <description>WhatsApp Get Messages connector implementation</description>
     ${connector-dependencies}

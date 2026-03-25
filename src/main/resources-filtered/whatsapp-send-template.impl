@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <implementation:connectorImplementation xmlns:implementation="http://www.bonitasoft.org/ns/connector/implementation/6.0">
-    <implementationId>${whatsapp.send-template.impl.id}</implementationId>
-    <implementationVersion>${whatsapp.send-template.impl.version}</implementationVersion>
-    <definitionId>${whatsapp.send-template.def.id}</definitionId>
-    <definitionVersion>${whatsapp.send-template.def.version}</definitionVersion>
-    <implementationClassname>${whatsapp.send-template.main-class}</implementationClassname>
+    <implementationId>${whatsapp-send-template.impl.id}</implementationId>
+    <implementationVersion>${whatsapp-send-template.impl.version}</implementationVersion>
+    <definitionId>${whatsapp-send-template.def.id}</definitionId>
+    <definitionVersion>${whatsapp-send-template.def.version}</definitionVersion>
+    <implementationClassname>${whatsapp-send-template.main-class}</implementationClassname>
     <hasSources>false</hasSources>
     <description>WhatsApp Send Template Message connector implementation</description>
     ${connector-dependencies}

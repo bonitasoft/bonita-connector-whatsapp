@@ -44,46 +44,46 @@
         <awaitility.version>4.2.0</awaitility.version>
 
         <!-- send-template -->
-        <whatsapp.send-template.def.id>whatsapp-send-template</whatsapp.send-template.def.id>
-        <whatsapp.send-template.def.version>1.0.0</whatsapp.send-template.def.version>
-        <whatsapp.send-template.impl.id>whatsapp-send-template-impl</whatsapp.send-template.impl.id>
-        <whatsapp.send-template.impl.version>${project.version}</whatsapp.send-template.impl.version>
-        <whatsapp.send-template.main-class>com.bonitasoft.connectors.whatsapp.SendTemplateConnector</whatsapp.send-template.main-class>
+        <whatsapp-send-template.def.id>whatsapp-send-template</whatsapp-send-template.def.id>
+        <whatsapp-send-template.def.version>1.0.0</whatsapp-send-template.def.version>
+        <whatsapp-send-template.impl.id>whatsapp-send-template-impl</whatsapp-send-template.impl.id>
+        <whatsapp-send-template.impl.version>${project.version}</whatsapp-send-template.impl.version>
+        <whatsapp-send-template.main-class>com.bonitasoft.connectors.whatsapp.SendTemplateConnector</whatsapp-send-template.main-class>
 
         <!-- send-text -->
-        <whatsapp.send-text.def.id>whatsapp-send-text</whatsapp.send-text.def.id>
-        <whatsapp.send-text.def.version>1.0.0</whatsapp.send-text.def.version>
-        <whatsapp.send-text.impl.id>whatsapp-send-text-impl</whatsapp.send-text.impl.id>
-        <whatsapp.send-text.impl.version>${project.version}</whatsapp.send-text.impl.version>
-        <whatsapp.send-text.main-class>com.bonitasoft.connectors.whatsapp.SendTextConnector</whatsapp.send-text.main-class>
+        <whatsapp-send-text.def.id>whatsapp-send-text</whatsapp-send-text.def.id>
+        <whatsapp-send-text.def.version>1.0.0</whatsapp-send-text.def.version>
+        <whatsapp-send-text.impl.id>whatsapp-send-text-impl</whatsapp-send-text.impl.id>
+        <whatsapp-send-text.impl.version>${project.version}</whatsapp-send-text.impl.version>
+        <whatsapp-send-text.main-class>com.bonitasoft.connectors.whatsapp.SendTextConnector</whatsapp-send-text.main-class>
 
         <!-- send-media -->
-        <whatsapp.send-media.def.id>whatsapp-send-media</whatsapp.send-media.def.id>
-        <whatsapp.send-media.def.version>1.0.0</whatsapp.send-media.def.version>
-        <whatsapp.send-media.impl.id>whatsapp-send-media-impl</whatsapp.send-media.impl.id>
-        <whatsapp.send-media.impl.version>${project.version}</whatsapp.send-media.impl.version>
-        <whatsapp.send-media.main-class>com.bonitasoft.connectors.whatsapp.SendMediaConnector</whatsapp.send-media.main-class>
+        <whatsapp-send-media.def.id>whatsapp-send-media</whatsapp-send-media.def.id>
+        <whatsapp-send-media.def.version>1.0.0</whatsapp-send-media.def.version>
+        <whatsapp-send-media.impl.id>whatsapp-send-media-impl</whatsapp-send-media.impl.id>
+        <whatsapp-send-media.impl.version>${project.version}</whatsapp-send-media.impl.version>
+        <whatsapp-send-media.main-class>com.bonitasoft.connectors.whatsapp.SendMediaConnector</whatsapp-send-media.main-class>
 
         <!-- get-status -->
-        <whatsapp.get-status.def.id>whatsapp-get-status</whatsapp.get-status.def.id>
-        <whatsapp.get-status.def.version>1.0.0</whatsapp.get-status.def.version>
-        <whatsapp.get-status.impl.id>whatsapp-get-status-impl</whatsapp.get-status.impl.id>
-        <whatsapp.get-status.impl.version>${project.version}</whatsapp.get-status.impl.version>
-        <whatsapp.get-status.main-class>com.bonitasoft.connectors.whatsapp.GetStatusConnector</whatsapp.get-status.main-class>
+        <whatsapp-get-status.def.id>whatsapp-get-status</whatsapp-get-status.def.id>
+        <whatsapp-get-status.def.version>1.0.0</whatsapp-get-status.def.version>
+        <whatsapp-get-status.impl.id>whatsapp-get-status-impl</whatsapp-get-status.impl.id>
+        <whatsapp-get-status.impl.version>${project.version}</whatsapp-get-status.impl.version>
+        <whatsapp-get-status.main-class>com.bonitasoft.connectors.whatsapp.GetStatusConnector</whatsapp-get-status.main-class>
 
         <!-- list-conversations -->
-        <whatsapp.list-conversations.def.id>whatsapp-list-conversations</whatsapp.list-conversations.def.id>
-        <whatsapp.list-conversations.def.version>1.0.0</whatsapp.list-conversations.def.version>
-        <whatsapp.list-conversations.impl.id>whatsapp-list-conversations-impl</whatsapp.list-conversations.impl.id>
-        <whatsapp.list-conversations.impl.version>${project.version}</whatsapp.list-conversations.impl.version>
-        <whatsapp.list-conversations.main-class>com.bonitasoft.connectors.whatsapp.ListConversationsConnector</whatsapp.list-conversations.main-class>
+        <whatsapp-list-conversations.def.id>whatsapp-list-conversations</whatsapp-list-conversations.def.id>
+        <whatsapp-list-conversations.def.version>1.0.0</whatsapp-list-conversations.def.version>
+        <whatsapp-list-conversations.impl.id>whatsapp-list-conversations-impl</whatsapp-list-conversations.impl.id>
+        <whatsapp-list-conversations.impl.version>${project.version}</whatsapp-list-conversations.impl.version>
+        <whatsapp-list-conversations.main-class>com.bonitasoft.connectors.whatsapp.ListConversationsConnector</whatsapp-list-conversations.main-class>
 
         <!-- get-messages -->
-        <whatsapp.get-messages.def.id>whatsapp-get-messages</whatsapp.get-messages.def.id>
-        <whatsapp.get-messages.def.version>1.0.0</whatsapp.get-messages.def.version>
-        <whatsapp.get-messages.impl.id>whatsapp-get-messages-impl</whatsapp.get-messages.impl.id>
-        <whatsapp.get-messages.impl.version>${project.version}</whatsapp.get-messages.impl.version>
-        <whatsapp.get-messages.main-class>com.bonitasoft.connectors.whatsapp.GetMessagesConnector</whatsapp.get-messages.main-class>
+        <whatsapp-get-messages.def.id>whatsapp-get-messages</whatsapp-get-messages.def.id>
+        <whatsapp-get-messages.def.version>1.0.0</whatsapp-get-messages.def.version>
+        <whatsapp-get-messages.impl.id>whatsapp-get-messages-impl</whatsapp-get-messages.impl.id>
+        <whatsapp-get-messages.impl.version>${project.version}</whatsapp-get-messages.impl.version>
+        <whatsapp-get-messages.main-class>com.bonitasoft.connectors.whatsapp.GetMessagesConnector</whatsapp-get-messages.main-class>
     </properties>
 
     <dependencyManagement>

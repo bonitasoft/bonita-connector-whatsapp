@@ -46,7 +46,7 @@ jobs:
         id: operations
         run: |
           echo "Extracting *.def.id property values from pom.xml..."
-          OPERATIONS=$(grep -oP '(?<=<)[a-z0-9-]+\.def\.id(?=>)' pom.xml \
+          OPERATIONS=$(grep -oP '(?<=<)[a-z0-9.-]+\.def\.id(?=>)' pom.xml \
             | sed 's/\.def\.id//' \
             | sort)
           echo "Operation property prefixes:"
@@ -305,7 +305,7 @@ jobs:
           ./mvnw versions:set -DnewVersion="${RELEASE_VERSION}" -DgenerateBackupPoms=false -q
 
           # Update all *.def.version properties in pom.xml from beta to release
-          sed -i "s|<\([a-z0-9-]*\)\.def\.version>${VERSION}</|<\1.def.version>${RELEASE_VERSION}</|g" pom.xml
+          sed -i "s|<\([a-z0-9.-]*\)\.def\.version>${VERSION}</|<\1.def.version>${RELEASE_VERSION}</|g" pom.xml
 
           # Remove ' [BETA]' suffix from connectorDefinitionLabel lines in .properties files
           find src -name '*.properties' -exec sed -i 's/ \[BETA\]//g' {} +
