@@ -1,0 +1,102 @@
+package com.bonitasoft.connectors.whatsapp;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.bonitasoft.engine.connector.ConnectorValidationException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+class GetMessagesConnectorTest {
+
+    @Mock private WhatsAppClient mockClient;
+    private GetMessagesConnector connector;
+
+    @BeforeEach void setUp() { connector = new GetMessagesConnector(); }
+
+    private void injectMockClient() throws Exception {
+        var f = AbstractWhatsAppConnector.class.getDeclaredField("client"); f.setAccessible(true); f.set(connector, mockClient);
+    }
+
+    private Map<String, Object> validInputs() {
+        Map<String, Object> m = new HashMap<>();
+        m.put("permanentToken", "tok"); m.put("phoneNumberId", "123"); m.put("contactPhone", "+34612345678");
+        return m;
+    }
+
+    @Test void should_get_messages_when_valid() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessages(any())).thenReturn(
+                new MessageListResult("[{\"id\":\"wamid.1\",\"text\":\"Hello\"}]", 1, false, ""));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(true);
+        assertThat(TestHelper.getOutputs(connector).get("messageCount")).isEqualTo(1);
+        assertThat((String) TestHelper.getOutputs(connector).get("messages")).contains("wamid.1");
+    }
+
+    @Test void should_fail_when_contactPhone_missing() {
+        Map<String, Object> m = validInputs(); m.remove("contactPhone");
+        connector.setInputParameters(m);
+        assertThatThrownBy(() -> connector.validateInputParameters()).isInstanceOf(ConnectorValidationException.class);
+    }
+
+    @Test void should_fail_when_phoneNumberId_missing() {
+        Map<String, Object> m = validInputs(); m.remove("phoneNumberId");
+        connector.setInputParameters(m);
+        assertThatThrownBy(() -> connector.validateInputParameters()).isInstanceOf(ConnectorValidationException.class);
+    }
+
+    @Test void should_normalize_contact_phone() throws Exception {
+        Map<String, Object> m = validInputs(); m.put("contactPhone", "+34 612-345-678");
+        connector.setInputParameters(m); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessages(any())).thenReturn(new MessageListResult("[]", 0, false, ""));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(true);
+    }
+
+    @Test void should_use_default_limit_20() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessages(any())).thenReturn(new MessageListResult("[]", 0, false, ""));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(true);
+    }
+
+    @Test void should_handle_pagination() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessages(any())).thenReturn(new MessageListResult("[...]", 20, true, "next_cursor"));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("hasMore")).isEqualTo(true);
+        assertThat(TestHelper.getOutputs(connector).get("nextCursor")).isEqualTo("next_cursor");
+    }
+
+    @Test void should_handle_api_error() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessages(any())).thenThrow(new WhatsAppException("Not found", 400, 133010, false));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
+        assertThat((String) TestHelper.getOutputs(connector).get("errorMessage")).contains("Not found");
+    }
+
+    @Test void should_return_empty_messages_array() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessages(any())).thenReturn(new MessageListResult("[]", 0, false, ""));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("messageCount")).isEqualTo(0);
+    }
+
+    @Test void should_handle_unexpected_error() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessages(any())).thenThrow(new RuntimeException("Timeout"));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
+    }
+}

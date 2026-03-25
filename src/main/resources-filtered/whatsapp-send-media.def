@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition:ConnectorDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:definition="http://www.bonitasoft.org/ns/connector/definition/6.1"
+    id="${whatsapp.send-media.def.id}" version="${whatsapp.send-media.def.version}">
+    <icon>whatsapp.png</icon>
+    <category icon="whatsapp.png" id="WhatsApp Business"/>
+    <input name="permanentToken" type="java.lang.String" mandatory="true"/>
+    <input name="baseUrl" type="java.lang.String" mandatory="false" defaultValue="https://graph.facebook.com/v23.0"/>
+    <input name="connectTimeout" type="java.lang.Integer" mandatory="false" defaultValue="30000"/>
+    <input name="readTimeout" type="java.lang.Integer" mandatory="false" defaultValue="60000"/>
+    <input name="phoneNumberId" type="java.lang.String" mandatory="true"/>
+    <input name="recipientPhone" type="java.lang.String" mandatory="true"/>
+    <input name="mediaType" type="java.lang.String" mandatory="true" defaultValue="document"/>
+    <input name="mediaUrl" type="java.lang.String" mandatory="false"/>
+    <input name="mediaId" type="java.lang.String" mandatory="false"/>
+    <input name="caption" type="java.lang.String" mandatory="false"/>
+    <input name="filename" type="java.lang.String" mandatory="false"/>
+    <output name="messageId" type="java.lang.String"/>
+    <output name="recipientPhone" type="java.lang.String"/>
+    <output name="success" type="java.lang.Boolean"/>
+    <output name="errorMessage" type="java.lang.String"/>
+    <page id="connectionPage">
+        <widget xsi:type="definition:Password" id="permanentTokenWidget" inputName="permanentToken"/>
+        <widget xsi:type="definition:Text" id="baseUrlWidget" inputName="baseUrl"/>
+        <widget xsi:type="definition:Text" id="connectTimeoutWidget" inputName="connectTimeout"/>
+        <widget xsi:type="definition:Text" id="readTimeoutWidget" inputName="readTimeout"/>
+    </page>
+    <page id="operationPage">
+        <widget xsi:type="definition:Text" id="recipientPhoneWidget" inputName="recipientPhone"/>
+        <widget xsi:type="definition:RadioGroup" id="mediaTypeWidget" inputName="mediaType">
+            <choices>image</choices>
+            <choices>document</choices>
+            <choices>audio</choices>
+            <choices>video</choices>
+        </widget>
+        <widget xsi:type="definition:Text" id="mediaUrlWidget" inputName="mediaUrl"/>
+        <widget xsi:type="definition:Text" id="mediaIdWidget" inputName="mediaId"/>
+        <widget xsi:type="definition:Text" id="captionWidget" inputName="caption"/>
+        <widget xsi:type="definition:Text" id="filenameWidget" inputName="filename"/>
+    </page>
+    <page id="configurationPage">
+        <widget xsi:type="definition:Text" id="phoneNumberIdWidget" inputName="phoneNumberId"/>
+    </page>
+</definition:ConnectorDefinition>

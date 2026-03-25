@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition:ConnectorDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:definition="http://www.bonitasoft.org/ns/connector/definition/6.1"
+    id="${whatsapp.get-status.def.id}" version="${whatsapp.get-status.def.version}">
+    <icon>whatsapp.png</icon>
+    <category icon="whatsapp.png" id="WhatsApp Business"/>
+    <input name="permanentToken" type="java.lang.String" mandatory="true"/>
+    <input name="baseUrl" type="java.lang.String" mandatory="false" defaultValue="https://graph.facebook.com/v23.0"/>
+    <input name="connectTimeout" type="java.lang.Integer" mandatory="false" defaultValue="30000"/>
+    <input name="readTimeout" type="java.lang.Integer" mandatory="false" defaultValue="60000"/>
+    <input name="messageId" type="java.lang.String" mandatory="true"/>
+    <output name="status" type="java.lang.String"/>
+    <output name="timestamp" type="java.lang.String"/>
+    <output name="errorCode" type="java.lang.String"/>
+    <output name="success" type="java.lang.Boolean"/>
+    <output name="errorMessage" type="java.lang.String"/>
+    <page id="connectionPage">
+        <widget xsi:type="definition:Password" id="permanentTokenWidget" inputName="permanentToken"/>
+        <widget xsi:type="definition:Text" id="baseUrlWidget" inputName="baseUrl"/>
+        <widget xsi:type="definition:Text" id="connectTimeoutWidget" inputName="connectTimeout"/>
+        <widget xsi:type="definition:Text" id="readTimeoutWidget" inputName="readTimeout"/>
+    </page>
+    <page id="operationPage">
+        <widget xsi:type="definition:Text" id="messageIdWidget" inputName="messageId"/>
+    </page>
+</definition:ConnectorDefinition>

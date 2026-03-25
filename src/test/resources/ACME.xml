@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Organization:Organization xmlns:Organization="http://documentation.bonitasoft.com/bdm-xml-schema/organization">
+    <groups>
+        <group name="ACME" parentPath="">
+            <displayName>ACME</displayName>
+        </group>
+    </groups>
+    <roles>
+        <role name="member">
+            <displayName>Member</displayName>
+        </role>
+    </roles>
+    <users>
+        <user userName="install">
+            <firstName>Install</firstName>
+            <lastName>Install</lastName>
+            <password encrypted="false">install</password>
+        </user>
+    </users>
+    <memberships>
+        <membership>
+            <userName>install</userName>
+            <roleName>member</roleName>
+            <groupParentPath/>
+            <groupName>ACME</groupName>
+        </membership>
+    </memberships>
+</Organization:Organization>

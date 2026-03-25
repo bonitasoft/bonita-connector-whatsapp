@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<implementation:connectorImplementation xmlns:implementation="http://www.bonitasoft.org/ns/connector/implementation/6.0">
+    <implementationId>${whatsapp.send-media.impl.id}</implementationId>
+    <implementationVersion>${whatsapp.send-media.impl.version}</implementationVersion>
+    <definitionId>${whatsapp.send-media.def.id}</definitionId>
+    <definitionVersion>${whatsapp.send-media.def.version}</definitionVersion>
+    <implementationClassname>${whatsapp.send-media.main-class}</implementationClassname>
+    <hasSources>false</hasSources>
+    <description>WhatsApp Send Media Message connector implementation</description>
+    ${connector-dependencies}
+</implementation:connectorImplementation>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definition:ConnectorDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:definition="http://www.bonitasoft.org/ns/connector/definition/6.1"
+    id="${whatsapp.list-conversations.def.id}" version="${whatsapp.list-conversations.def.version}">
+    <icon>whatsapp.png</icon>
+    <category icon="whatsapp.png" id="WhatsApp Business"/>
+    <input name="permanentToken" type="java.lang.String" mandatory="true"/>
+    <input name="baseUrl" type="java.lang.String" mandatory="false" defaultValue="https://graph.facebook.com/v23.0"/>
+    <input name="connectTimeout" type="java.lang.Integer" mandatory="false" defaultValue="30000"/>
+    <input name="readTimeout" type="java.lang.Integer" mandatory="false" defaultValue="60000"/>
+    <input name="wabaId" type="java.lang.String" mandatory="true"/>
+    <input name="startDate" type="java.lang.String" mandatory="true"/>
+    <input name="endDate" type="java.lang.String" mandatory="true"/>
+    <input name="granularity" type="java.lang.String" mandatory="false" defaultValue="DAILY"/>
+    <input name="conversationType" type="java.lang.String" mandatory="false"/>
+    <input name="direction" type="java.lang.String" mandatory="false"/>
+    <input name="limit" type="java.lang.Integer" mandatory="false" defaultValue="500"/>
+    <input name="cursor" type="java.lang.String" mandatory="false"/>
+    <output name="conversations" type="java.lang.String"/>
+    <output name="totalCount" type="java.lang.Integer"/>
+    <output name="hasMore" type="java.lang.Boolean"/>
+    <output name="nextCursor" type="java.lang.String"/>
+    <output name="success" type="java.lang.Boolean"/>
+    <output name="errorMessage" type="java.lang.String"/>
+    <page id="connectionPage">
+        <widget xsi:type="definition:Password" id="permanentTokenWidget" inputName="permanentToken"/>
+        <widget xsi:type="definition:Text" id="baseUrlWidget" inputName="baseUrl"/>
+        <widget xsi:type="definition:Text" id="connectTimeoutWidget" inputName="connectTimeout"/>
+        <widget xsi:type="definition:Text" id="readTimeoutWidget" inputName="readTimeout"/>
+    </page>
+    <page id="operationPage">
+        <widget xsi:type="definition:Text" id="wabaIdWidget" inputName="wabaId"/>
+        <widget xsi:type="definition:Text" id="startDateWidget" inputName="startDate"/>
+        <widget xsi:type="definition:Text" id="endDateWidget" inputName="endDate"/>
+        <widget xsi:type="definition:RadioGroup" id="granularityWidget" inputName="granularity">
+            <choices>HALF_HOUR</choices>
+            <choices>DAILY</choices>
+            <choices>MONTHLY</choices>
+        </widget>
+        <widget xsi:type="definition:Text" id="conversationTypeWidget" inputName="conversationType"/>
+        <widget xsi:type="definition:Text" id="directionWidget" inputName="direction"/>
+    </page>
+    <page id="paginationPage">
+        <widget xsi:type="definition:Text" id="limitWidget" inputName="limit"/>
+        <widget xsi:type="definition:Text" id="cursorWidget" inputName="cursor"/>
+    </page>
+</definition:ConnectorDefinition>
