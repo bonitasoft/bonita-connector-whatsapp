@@ -333,6 +333,14 @@
                 <configuration>
                     <targetClasses><param>com.bonitasoft.connectors.whatsapp.*</param></targetClasses>
                     <targetTests><param>com.bonitasoft.connectors.whatsapp.*Test</param></targetTests>
+                    <excludedClasses>
+                        <param>com.bonitasoft.connectors.whatsapp.WhatsAppConfiguration</param>
+                        <param>com.bonitasoft.connectors.whatsapp.WhatsAppConfiguration$*</param>
+                    </excludedClasses>
+                    <avoidCallsTo>
+                        <avoidCallsTo>org.slf4j</avoidCallsTo>
+                        <avoidCallsTo>lombok</avoidCallsTo>
+                    </avoidCallsTo>
                     <mutators><mutator>DEFAULTS</mutator></mutators>
                     <outputFormats><param>HTML</param><param>CSV</param></outputFormats>
                     <timestampedReports>false</timestampedReports>
