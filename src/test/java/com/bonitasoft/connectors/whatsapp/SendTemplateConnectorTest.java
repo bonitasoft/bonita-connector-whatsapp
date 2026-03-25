@@ -171,4 +171,74 @@ class SendTemplateConnectorTest {
         assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
         assertThat((String) TestHelper.getOutputs(connector).get("errorMessage")).contains("Unexpected error");
     }
+
+    @Test
+    void should_handle_rate_limit_error() throws Exception {
+        setInputs(validInputs());
+        connector.validateInputParameters();
+        injectMockClient();
+        when(mockClient.sendTemplateMessage(any())).thenThrow(
+                new WhatsAppException("Rate limit hit", 429, 130429, true));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
+        assertThat((String) TestHelper.getOutputs(connector).get("errorMessage")).contains("Rate limit");
+    }
+
+    @Test
+    void should_fail_validation_when_phone_too_short() {
+        Map<String, Object> inputs = validInputs();
+        inputs.put("recipientPhone", "12345");
+        setInputs(inputs);
+        assertThatThrownBy(() -> connector.validateInputParameters())
+                .isInstanceOf(ConnectorValidationException.class)
+                .hasMessageContaining("7-15 digits");
+    }
+
+    @Test
+    void should_fail_validation_when_phone_too_long() {
+        Map<String, Object> inputs = validInputs();
+        inputs.put("recipientPhone", "1234567890123456");
+        setInputs(inputs);
+        assertThatThrownBy(() -> connector.validateInputParameters())
+                .isInstanceOf(ConnectorValidationException.class)
+                .hasMessageContaining("7-15 digits");
+    }
+
+    @Test
+    void should_accept_phone_with_dashes() throws Exception {
+        Map<String, Object> inputs = validInputs();
+        inputs.put("recipientPhone", "34-612-345-678");
+        setInputs(inputs);
+        connector.validateInputParameters();
+        injectMockClient();
+        when(mockClient.sendTemplateMessage(any())).thenReturn(
+                new SendMessageResult("wamid.dash", "34612345678"));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(true);
+    }
+
+    @Test
+    void should_handle_auth_failure() throws Exception {
+        setInputs(validInputs());
+        connector.validateInputParameters();
+        injectMockClient();
+        when(mockClient.sendTemplateMessage(any())).thenThrow(
+                new WhatsAppException("Invalid OAuth access token", 401, 190, false));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
+        assertThat((String) TestHelper.getOutputs(connector).get("errorMessage")).contains("Invalid OAuth");
+    }
+
+    @Test
+    void should_truncate_long_error_message() throws Exception {
+        setInputs(validInputs());
+        connector.validateInputParameters();
+        injectMockClient();
+        String longMsg = "x".repeat(2000);
+        when(mockClient.sendTemplateMessage(any())).thenThrow(
+                new WhatsAppException(longMsg, 400, false));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
+        assertThat(((String) TestHelper.getOutputs(connector).get("errorMessage")).length()).isLessThanOrEqualTo(1000);
+    }
 }

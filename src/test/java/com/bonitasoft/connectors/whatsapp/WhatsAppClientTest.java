@@ -224,4 +224,183 @@ class WhatsAppClientTest {
         SendMessageResult result = client.sendTemplateMessage(cfg);
         assertThat(result.messageId()).isEqualTo("wamid.tpl");
     }
+
+    @Test
+    void should_handle_500_server_error() {
+        server.enqueue(new MockResponse().setBody("""
+                {"error":{"code":1,"message":"Internal server error","type":"OAuthException"}}
+                """).setResponseCode(500));
+        WhatsAppConfiguration cfg = WhatsAppConfiguration.builder()
+                .baseUrl(server.url("/v23.0").toString())
+                .permanentToken("tok")
+                .phoneNumberId("12345")
+                .recipientPhone("34612345678")
+                .messageBody("test")
+                .build();
+        // Enqueue enough responses for all retries
+        for (int i = 0; i < 3; i++) {
+            server.enqueue(new MockResponse().setBody("""
+                    {"error":{"code":1,"message":"Internal server error","type":"OAuthException"}}
+                    """).setResponseCode(500));
+        }
+        assertThatThrownBy(() -> client.sendTextMessage(cfg))
+                .isInstanceOf(WhatsAppException.class)
+                .satisfies(e -> assertThat(((WhatsAppException) e).getStatusCode()).isEqualTo(500));
+    }
+
+    @Test
+    void should_handle_401_unauthorized() {
+        server.enqueue(new MockResponse().setBody("""
+                {"error":{"code":190,"message":"Invalid OAuth access token","type":"OAuthException"}}
+                """).setResponseCode(401));
+        WhatsAppConfiguration cfg = WhatsAppConfiguration.builder()
+                .baseUrl(server.url("/v23.0").toString())
+                .permanentToken("bad-token")
+                .phoneNumberId("12345")
+                .recipientPhone("34612345678")
+                .messageBody("test")
+                .build();
+        assertThatThrownBy(() -> client.sendTextMessage(cfg))
+                .isInstanceOf(WhatsAppException.class)
+                .satisfies(e -> {
+                    WhatsAppException we = (WhatsAppException) e;
+                    assertThat(we.getStatusCode()).isEqualTo(401);
+                    assertThat(we.getErrorCode()).isEqualTo(190);
+                });
+    }
+
+    @Test
+    void should_send_media_with_id_instead_of_url() throws Exception {
+        server.enqueue(new MockResponse().setBody("""
+                {"messages":[{"id":"wamid.mediaid"}],"contacts":[{"wa_id":"34612345678"}]}
+                """).setResponseCode(200));
+        WhatsAppConfiguration cfg = WhatsAppConfiguration.builder()
+                .baseUrl(server.url("/v23.0").toString())
+                .permanentToken("tok")
+                .phoneNumberId("12345")
+                .recipientPhone("34612345678")
+                .mediaType("image")
+                .mediaId("media-123")
+                .build();
+        SendMessageResult result = client.sendMediaMessage(cfg);
+        assertThat(result.messageId()).isEqualTo("wamid.mediaid");
+    }
+
+    @Test
+    void should_handle_malformed_error_response() {
+        server.enqueue(new MockResponse().setBody("not json").setResponseCode(400));
+        WhatsAppConfiguration cfg = WhatsAppConfiguration.builder()
+                .baseUrl(server.url("/v23.0").toString())
+                .permanentToken("tok")
+                .phoneNumberId("12345")
+                .recipientPhone("34612345678")
+                .messageBody("test")
+                .build();
+        assertThatThrownBy(() -> client.sendTextMessage(cfg))
+                .isInstanceOf(WhatsAppException.class)
+                .hasMessageContaining("HTTP 400");
+    }
+
+    @Test
+    void should_include_authorization_header() throws Exception {
+        server.enqueue(new MockResponse().setBody("""
+                {"messages":[{"id":"wamid.auth"}],"contacts":[{"wa_id":"34612345678"}]}
+                """).setResponseCode(200));
+        WhatsAppConfiguration cfg = WhatsAppConfiguration.builder()
+                .baseUrl(server.url("/v23.0").toString())
+                .permanentToken("tok")
+                .phoneNumberId("12345")
+                .recipientPhone("34612345678")
+                .messageBody("test")
+                .build();
+        client.sendTextMessage(cfg);
+        var request = server.takeRequest();
+        assertThat(request.getHeader("Authorization")).isEqualTo("Bearer test-token");
+    }
+
+    @Test
+    void should_get_messages_with_pagination() throws Exception {
+        server.enqueue(new MockResponse().setBody("""
+                {"data":[{"id":"msg1"}],"paging":{"next":"http://next","cursors":{"after":"cursor1"}}}
+                """).setResponseCode(200));
+        WhatsAppConfiguration cfg = WhatsAppConfiguration.builder()
+                .baseUrl(server.url("/v23.0").toString())
+                .permanentToken("tok")
+                .phoneNumberId("12345")
+                .contactPhone("34612345678")
+                .limit(10)
+                .build();
+        MessageListResult result = client.getMessages(cfg);
+        assertThat(result.messageCount()).isEqualTo(1);
+        assertThat(result.hasMore()).isTrue();
+        assertThat(result.nextCursor()).isEqualTo("cursor1");
+    }
+
+    @Test
+    void should_list_conversations_with_pagination() throws Exception {
+        server.enqueue(new MockResponse().setBody("""
+                {"conversation_analytics":{"data":[{"count":10}]},"paging":{"next":"http://next","cursors":{"after":"c2"}}}
+                """).setResponseCode(200));
+        WhatsAppConfiguration cfg = WhatsAppConfiguration.builder()
+                .baseUrl(server.url("/v23.0").toString())
+                .permanentToken("tok")
+                .wabaId("waba1")
+                .startDate("1740787200")
+                .endDate("1743379200")
+                .granularity("DAILY")
+                .limit(500)
+                .build();
+        ConversationAnalyticsResult result = client.listConversations(cfg);
+        assertThat(result.totalCount()).isEqualTo(1);
+        assertThat(result.hasMore()).isTrue();
+        assertThat(result.nextCursor()).isEqualTo("c2");
+    }
+
+    @Test
+    void should_throw_on_blank_date() {
+        assertThatThrownBy(() -> client.toUnixTimestamp(""))
+                .isInstanceOf(WhatsAppException.class);
+    }
+
+    @Test
+    void should_throw_on_null_date() {
+        assertThatThrownBy(() -> client.toUnixTimestamp(null))
+                .isInstanceOf(WhatsAppException.class);
+    }
+
+    @Test
+    void should_handle_empty_response_body() {
+        server.enqueue(new MockResponse().setBody("").setResponseCode(400));
+        WhatsAppConfiguration cfg = WhatsAppConfiguration.builder()
+                .baseUrl(server.url("/v23.0").toString())
+                .permanentToken("tok")
+                .phoneNumberId("12345")
+                .recipientPhone("34612345678")
+                .messageBody("test")
+                .build();
+        assertThatThrownBy(() -> client.sendTextMessage(cfg))
+                .isInstanceOf(WhatsAppException.class);
+    }
+
+    @Test
+    void should_send_audio_without_caption() throws Exception {
+        server.enqueue(new MockResponse().setBody("""
+                {"messages":[{"id":"wamid.audio1"}],"contacts":[{"wa_id":"34612345678"}]}
+                """).setResponseCode(200));
+        WhatsAppConfiguration cfg = WhatsAppConfiguration.builder()
+                .baseUrl(server.url("/v23.0").toString())
+                .permanentToken("tok")
+                .phoneNumberId("12345")
+                .recipientPhone("34612345678")
+                .mediaType("audio")
+                .mediaUrl("https://example.com/audio.ogg")
+                .caption("Ignored caption for audio")
+                .build();
+        SendMessageResult result = client.sendMediaMessage(cfg);
+        assertThat(result.messageId()).isEqualTo("wamid.audio1");
+        // Verify the request body does NOT contain caption for audio
+        var request = server.takeRequest();
+        String body = request.getBody().readUtf8();
+        assertThat(body).doesNotContain("caption");
+    }
 }

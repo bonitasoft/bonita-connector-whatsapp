@@ -92,4 +92,47 @@ class GetStatusConnectorTest {
         connector.executeBusinessLogic();
         assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
     }
+
+    @Test void should_verify_all_outputs_on_success() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessageStatus(any())).thenReturn(new MessageStatusResult("delivered", "2026-03-24T09:15:33Z", ""));
+        connector.executeBusinessLogic();
+        Map<String, Object> outputs = TestHelper.getOutputs(connector);
+        assertThat(outputs.get("success")).isEqualTo(true);
+        assertThat(outputs.get("errorMessage")).isEqualTo("");
+        assertThat(outputs.get("status")).isEqualTo("delivered");
+        assertThat(outputs.get("timestamp")).isEqualTo("2026-03-24T09:15:33Z");
+        assertThat(outputs.get("errorCode")).isEqualTo("");
+    }
+
+    @Test void should_accept_null_optional_inputs() throws Exception {
+        Map<String, Object> m = validInputs();
+        m.put("baseUrl", null);
+        connector.setInputParameters(m);
+        connector.validateInputParameters();
+        // Should build with default base URL
+    }
+
+    @Test void should_use_default_timeouts() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessageStatus(any())).thenReturn(new MessageStatusResult("sent", "2026-03-24T09:00:00Z", ""));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(true);
+    }
+
+    @Test void should_truncate_long_error_message() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessageStatus(any())).thenThrow(
+                new WhatsAppException("x".repeat(2000), 400, false));
+        connector.executeBusinessLogic();
+        assertThat(((String) TestHelper.getOutputs(connector).get("errorMessage")).length()).isLessThanOrEqualTo(1000);
+    }
+
+    @Test void should_handle_rate_limit_error() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessageStatus(any())).thenThrow(
+                new WhatsAppException("Rate limit hit", 429, 130429, true));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
+    }
 }

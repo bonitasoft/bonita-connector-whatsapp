@@ -99,4 +99,66 @@ class GetMessagesConnectorTest {
         connector.executeBusinessLogic();
         assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
     }
+
+    @Test void should_fail_when_token_missing() {
+        Map<String, Object> m = validInputs(); m.remove("permanentToken");
+        connector.setInputParameters(m);
+        assertThatThrownBy(() -> connector.validateInputParameters())
+                .isInstanceOf(ConnectorValidationException.class).hasMessageContaining("token");
+    }
+
+    @Test void should_verify_all_outputs_on_success() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessages(any())).thenReturn(
+                new MessageListResult("[{\"id\":\"wamid.1\"}]", 1, false, ""));
+        connector.executeBusinessLogic();
+        Map<String, Object> outputs = TestHelper.getOutputs(connector);
+        assertThat(outputs.get("success")).isEqualTo(true);
+        assertThat(outputs.get("errorMessage")).isEqualTo("");
+        assertThat(outputs.get("messages")).isNotNull();
+        assertThat(outputs.get("messageCount")).isEqualTo(1);
+        assertThat(outputs.get("hasMore")).isEqualTo(false);
+        assertThat(outputs.get("nextCursor")).isEqualTo("");
+    }
+
+    @Test void should_accept_custom_limit() throws Exception {
+        Map<String, Object> m = validInputs(); m.put("limit", 50);
+        connector.setInputParameters(m); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessages(any())).thenReturn(new MessageListResult("[]", 0, false, ""));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(true);
+    }
+
+    @Test void should_accept_cursor_for_pagination() throws Exception {
+        Map<String, Object> m = validInputs(); m.put("cursor", "abc123");
+        connector.setInputParameters(m); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessages(any())).thenReturn(new MessageListResult("[]", 0, false, ""));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(true);
+    }
+
+    @Test void should_truncate_long_error_message() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessages(any())).thenThrow(
+                new WhatsAppException("x".repeat(2000), 400, false));
+        connector.executeBusinessLogic();
+        assertThat(((String) TestHelper.getOutputs(connector).get("errorMessage")).length()).isLessThanOrEqualTo(1000);
+    }
+
+    @Test void should_handle_rate_limit_error() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessages(any())).thenThrow(
+                new WhatsAppException("Rate limit hit", 429, 4, true));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
+    }
+
+    @Test void should_handle_auth_failure() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.getMessages(any())).thenThrow(
+                new WhatsAppException("Invalid OAuth access token", 401, 190, false));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
+        assertThat((String) TestHelper.getOutputs(connector).get("errorMessage")).contains("Invalid OAuth");
+    }
 }

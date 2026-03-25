@@ -102,4 +102,86 @@ class SendTextConnectorTest {
         connector.executeBusinessLogic();
         assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
     }
+
+    @Test void should_handle_unexpected_exception() throws Exception {
+        connector.setInputParameters(validInputs());
+        connector.validateInputParameters();
+        injectMockClient();
+        when(mockClient.sendTextMessage(any())).thenThrow(new RuntimeException("Network failure"));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
+        assertThat((String) TestHelper.getOutputs(connector).get("errorMessage")).contains("Unexpected error");
+    }
+
+    @Test void should_fail_when_token_missing() {
+        Map<String, Object> m = validInputs(); m.remove("permanentToken");
+        connector.setInputParameters(m);
+        assertThatThrownBy(() -> connector.validateInputParameters())
+                .isInstanceOf(ConnectorValidationException.class).hasMessageContaining("token");
+    }
+
+    @Test void should_verify_all_outputs_on_success() throws Exception {
+        connector.setInputParameters(validInputs());
+        connector.validateInputParameters();
+        injectMockClient();
+        when(mockClient.sendTextMessage(any())).thenReturn(new SendMessageResult("wamid.full", "34612345678"));
+        connector.executeBusinessLogic();
+        Map<String, Object> outputs = TestHelper.getOutputs(connector);
+        assertThat(outputs.get("success")).isEqualTo(true);
+        assertThat(outputs.get("errorMessage")).isEqualTo("");
+        assertThat(outputs.get("messageId")).isEqualTo("wamid.full");
+        assertThat(outputs.get("recipientPhone")).isEqualTo("34612345678");
+    }
+
+    @Test void should_accept_null_optional_previewUrl() throws Exception {
+        Map<String, Object> m = validInputs();
+        m.put("previewUrl", null);
+        connector.setInputParameters(m);
+        connector.validateInputParameters();
+        injectMockClient();
+        when(mockClient.sendTextMessage(any())).thenReturn(new SendMessageResult("wamid.opt", "34612345678"));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(true);
+    }
+
+    @Test void should_truncate_long_error_message() throws Exception {
+        connector.setInputParameters(validInputs());
+        connector.validateInputParameters();
+        injectMockClient();
+        when(mockClient.sendTextMessage(any())).thenThrow(
+                new WhatsAppException("x".repeat(2000), 400, false));
+        connector.executeBusinessLogic();
+        assertThat(((String) TestHelper.getOutputs(connector).get("errorMessage")).length()).isLessThanOrEqualTo(1000);
+    }
+
+    @Test void should_accept_message_body_exactly_4096_chars() throws Exception {
+        Map<String, Object> m = validInputs(); m.put("messageBody", "a".repeat(4096));
+        connector.setInputParameters(m);
+        connector.validateInputParameters();
+        injectMockClient();
+        when(mockClient.sendTextMessage(any())).thenReturn(new SendMessageResult("wamid.max", "34612345678"));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(true);
+    }
+
+    @Test void should_handle_auth_failure() throws Exception {
+        connector.setInputParameters(validInputs());
+        connector.validateInputParameters();
+        injectMockClient();
+        when(mockClient.sendTextMessage(any())).thenThrow(
+                new WhatsAppException("Invalid OAuth access token", 401, 190, false));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
+        assertThat((String) TestHelper.getOutputs(connector).get("errorMessage")).contains("Invalid OAuth");
+    }
+
+    @Test void should_normalize_phone_with_spaces() throws Exception {
+        Map<String, Object> m = validInputs(); m.put("recipientPhone", "+34 612 345 678");
+        connector.setInputParameters(m);
+        connector.validateInputParameters();
+        injectMockClient();
+        when(mockClient.sendTextMessage(any())).thenReturn(new SendMessageResult("wamid.norm", "34612345678"));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(true);
+    }
 }

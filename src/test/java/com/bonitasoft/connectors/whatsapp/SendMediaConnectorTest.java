@@ -93,4 +93,83 @@ class SendMediaConnectorTest {
         assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
         assertThat((String) TestHelper.getOutputs(connector).get("errorMessage")).contains("File too large");
     }
+
+    @Test void should_fail_when_token_missing() {
+        Map<String, Object> m = validInputs(); m.remove("permanentToken");
+        connector.setInputParameters(m);
+        assertThatThrownBy(() -> connector.validateInputParameters())
+                .isInstanceOf(ConnectorValidationException.class).hasMessageContaining("token");
+    }
+
+    @Test void should_fail_when_phoneNumberId_missing() {
+        Map<String, Object> m = validInputs(); m.remove("phoneNumberId");
+        connector.setInputParameters(m);
+        assertThatThrownBy(() -> connector.validateInputParameters()).isInstanceOf(ConnectorValidationException.class);
+    }
+
+    @Test void should_handle_unexpected_exception() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.sendMediaMessage(any())).thenThrow(new RuntimeException("Connection reset"));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
+        assertThat((String) TestHelper.getOutputs(connector).get("errorMessage")).contains("Unexpected error");
+    }
+
+    @Test void should_verify_all_outputs_on_success() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.sendMediaMessage(any())).thenReturn(new SendMessageResult("wamid.full", "34612345678"));
+        connector.executeBusinessLogic();
+        Map<String, Object> outputs = TestHelper.getOutputs(connector);
+        assertThat(outputs.get("success")).isEqualTo(true);
+        assertThat(outputs.get("errorMessage")).isEqualTo("");
+        assertThat(outputs.get("messageId")).isEqualTo("wamid.full");
+        assertThat(outputs.get("recipientPhone")).isEqualTo("34612345678");
+    }
+
+    @Test void should_send_audio_without_caption() throws Exception {
+        Map<String, Object> m = validInputs(); m.put("mediaType", "audio"); m.put("caption", "Ignored for audio");
+        connector.setInputParameters(m); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.sendMediaMessage(any())).thenReturn(new SendMessageResult("wamid.audio", "34612345678"));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(true);
+    }
+
+    @Test void should_send_video_with_url() throws Exception {
+        Map<String, Object> m = validInputs(); m.put("mediaType", "video"); m.put("mediaUrl", "https://example.com/video.mp4");
+        connector.setInputParameters(m); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.sendMediaMessage(any())).thenReturn(new SendMessageResult("wamid.video", "34612345678"));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(true);
+    }
+
+    @Test void should_truncate_long_error_message() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.sendMediaMessage(any())).thenThrow(
+                new WhatsAppException("x".repeat(2000), 400, false));
+        connector.executeBusinessLogic();
+        assertThat(((String) TestHelper.getOutputs(connector).get("errorMessage")).length()).isLessThanOrEqualTo(1000);
+    }
+
+    @Test void should_fail_when_mediaType_missing() {
+        Map<String, Object> m = validInputs(); m.remove("mediaType");
+        connector.setInputParameters(m);
+        assertThatThrownBy(() -> connector.validateInputParameters()).isInstanceOf(ConnectorValidationException.class);
+    }
+
+    @Test void should_handle_rate_limit_error() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.sendMediaMessage(any())).thenThrow(
+                new WhatsAppException("Rate limit hit", 429, 130429, true));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
+    }
+
+    @Test void should_handle_auth_failure() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.sendMediaMessage(any())).thenThrow(
+                new WhatsAppException("Invalid OAuth access token", 401, 190, false));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
+        assertThat((String) TestHelper.getOutputs(connector).get("errorMessage")).contains("Invalid OAuth");
+    }
 }

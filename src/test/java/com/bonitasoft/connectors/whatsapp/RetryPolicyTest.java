@@ -89,4 +89,103 @@ class RetryPolicyTest {
             throw new RuntimeException("boom");
         })).isInstanceOf(WhatsAppException.class).hasMessageContaining("Unexpected error");
     }
+
+    @Test
+    void should_retry_on_502() {
+        AtomicInteger attempts = new AtomicInteger(0);
+        String result = policy.execute(() -> {
+            if (attempts.incrementAndGet() < 2) {
+                throw new WhatsAppException("Bad Gateway", 502, true);
+            }
+            return "recovered";
+        });
+        assertThat(result).isEqualTo("recovered");
+        assertThat(attempts.get()).isEqualTo(2);
+    }
+
+    @Test
+    void should_retry_on_503() {
+        AtomicInteger attempts = new AtomicInteger(0);
+        String result = policy.execute(() -> {
+            if (attempts.incrementAndGet() < 2) {
+                throw new WhatsAppException("Service Unavailable", 503, true);
+            }
+            return "ok";
+        });
+        assertThat(result).isEqualTo("ok");
+    }
+
+    @Test
+    void should_not_retry_on_401() {
+        assertThatThrownBy(() -> policy.execute(() -> {
+            throw new WhatsAppException("Unauthorized", 401, false);
+        })).isInstanceOf(WhatsAppException.class).hasMessageContaining("Unauthorized");
+    }
+
+    @Test
+    void should_not_retry_on_403() {
+        assertThatThrownBy(() -> policy.execute(() -> {
+            throw new WhatsAppException("Forbidden", 403, false);
+        })).isInstanceOf(WhatsAppException.class).hasMessageContaining("Forbidden");
+    }
+
+    @Test
+    void should_not_retry_on_404() {
+        assertThatThrownBy(() -> policy.execute(() -> {
+            throw new WhatsAppException("Not Found", 404, false);
+        })).isInstanceOf(WhatsAppException.class).hasMessageContaining("Not Found");
+    }
+
+    @Test
+    void should_retry_on_meta_code_131056() {
+        AtomicInteger attempts = new AtomicInteger(0);
+        String result = policy.execute(() -> {
+            if (attempts.incrementAndGet() < 2) {
+                throw new WhatsAppException("Pair rate limit", 429, 131056, true);
+            }
+            return "ok";
+        });
+        assertThat(result).isEqualTo("ok");
+    }
+
+    @Test
+    void should_retry_on_meta_code_4() {
+        AtomicInteger attempts = new AtomicInteger(0);
+        String result = policy.execute(() -> {
+            if (attempts.incrementAndGet() < 2) {
+                throw new WhatsAppException("App-level rate limit", 200, 4, false);
+            }
+            return "ok";
+        });
+        assertThat(result).isEqualTo("ok");
+    }
+
+    @Test
+    void should_calculate_exponential_wait_for_higher_attempts() {
+        assertThat(policy.calculateWait(3)).isEqualTo(8000);
+        assertThat(policy.calculateWait(4)).isEqualTo(16000);
+    }
+
+    @Test
+    void should_return_null_result_when_callable_returns_null() {
+        Object result = policy.execute(() -> null);
+        assertThat(result).isNull();
+    }
+
+    @Test
+    void should_preserve_exception_message_on_non_retryable() {
+        assertThatThrownBy(() -> policy.execute(() -> {
+            throw new WhatsAppException("Specific error message 12345", 400, false);
+        })).isInstanceOf(WhatsAppException.class)
+                .hasMessage("Specific error message 12345");
+    }
+
+    @Test
+    void should_preserve_exception_on_checked_exception() {
+        assertThatThrownBy(() -> policy.execute(() -> {
+            throw new java.io.IOException("IO error");
+        })).isInstanceOf(WhatsAppException.class)
+                .hasMessageContaining("Unexpected error")
+                .hasMessageContaining("IO error");
+    }
 }

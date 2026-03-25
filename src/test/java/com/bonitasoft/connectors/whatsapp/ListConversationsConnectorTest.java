@@ -95,4 +95,83 @@ class ListConversationsConnectorTest {
         connector.executeBusinessLogic();
         assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
     }
+
+    @Test void should_fail_when_token_missing() {
+        Map<String, Object> m = validInputs(); m.remove("permanentToken");
+        connector.setInputParameters(m);
+        assertThatThrownBy(() -> connector.validateInputParameters())
+                .isInstanceOf(ConnectorValidationException.class).hasMessageContaining("token");
+    }
+
+    @Test void should_fail_when_endDate_missing() {
+        Map<String, Object> m = validInputs(); m.remove("endDate");
+        connector.setInputParameters(m);
+        assertThatThrownBy(() -> connector.validateInputParameters()).isInstanceOf(ConnectorValidationException.class);
+    }
+
+    @Test void should_handle_unexpected_error() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.listConversations(any())).thenThrow(new RuntimeException("Timeout"));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(false);
+        assertThat((String) TestHelper.getOutputs(connector).get("errorMessage")).contains("Unexpected error");
+    }
+
+    @Test void should_verify_all_outputs_on_success() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.listConversations(any())).thenReturn(
+                new ConversationAnalyticsResult("[{\"count\":42}]", 1, false, ""));
+        connector.executeBusinessLogic();
+        Map<String, Object> outputs = TestHelper.getOutputs(connector);
+        assertThat(outputs.get("success")).isEqualTo(true);
+        assertThat(outputs.get("errorMessage")).isEqualTo("");
+        assertThat(outputs.get("conversations")).isNotNull();
+        assertThat(outputs.get("totalCount")).isEqualTo(1);
+        assertThat(outputs.get("hasMore")).isEqualTo(false);
+        assertThat(outputs.get("nextCursor")).isEqualTo("");
+    }
+
+    @Test void should_accept_optional_conversation_type_and_direction() throws Exception {
+        Map<String, Object> m = validInputs();
+        m.put("conversationType", "REGULAR");
+        m.put("direction", "BUSINESS_INITIATED");
+        connector.setInputParameters(m); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.listConversations(any())).thenReturn(
+                new ConversationAnalyticsResult("[]", 0, false, ""));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(true);
+    }
+
+    @Test void should_accept_custom_limit() throws Exception {
+        Map<String, Object> m = validInputs(); m.put("limit", 100);
+        connector.setInputParameters(m); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.listConversations(any())).thenReturn(
+                new ConversationAnalyticsResult("[]", 0, false, ""));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(true);
+    }
+
+    @Test void should_fail_when_invalid_date_format() {
+        Map<String, Object> m = validInputs(); m.put("startDate", "not-a-date");
+        connector.setInputParameters(m);
+        assertThatThrownBy(() -> connector.validateInputParameters())
+                .isInstanceOf(ConnectorValidationException.class).hasMessageContaining("Invalid date format");
+    }
+
+    @Test void should_truncate_long_error_message() throws Exception {
+        connector.setInputParameters(validInputs()); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.listConversations(any())).thenThrow(
+                new WhatsAppException("x".repeat(2000), 400, false));
+        connector.executeBusinessLogic();
+        assertThat(((String) TestHelper.getOutputs(connector).get("errorMessage")).length()).isLessThanOrEqualTo(1000);
+    }
+
+    @Test void should_accept_cursor_for_pagination() throws Exception {
+        Map<String, Object> m = validInputs(); m.put("cursor", "cursor_abc");
+        connector.setInputParameters(m); connector.validateInputParameters(); injectMockClient();
+        when(mockClient.listConversations(any())).thenReturn(
+                new ConversationAnalyticsResult("[]", 0, false, ""));
+        connector.executeBusinessLogic();
+        assertThat(TestHelper.getOutputs(connector).get("success")).isEqualTo(true);
+    }
 }
