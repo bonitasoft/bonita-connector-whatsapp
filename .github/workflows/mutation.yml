@@ -38,6 +38,11 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      - name: Configure Maven Settings
+        uses: bonitasoft/maven-settings-action@v1
+        with:
+          keeper-secret-config: ${{ secrets.KSM_CONFIG }}
+
       - name: Run Mutation Testing
         run: |
           echo "Running PIT Mutation Testing with ${{ github.event.inputs.mutator }} mutators..."
