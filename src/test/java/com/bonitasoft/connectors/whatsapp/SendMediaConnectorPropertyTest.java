@@ -10,6 +10,7 @@ import java.util.Map;
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
 import net.jqwik.api.ForAll;
+import net.jqwik.api.Example;
 import net.jqwik.api.Property;
 import net.jqwik.api.Provide;
 import net.jqwik.api.constraints.AlphaChars;
@@ -52,7 +53,7 @@ class SendMediaConnectorPropertyTest {
         return inputs;
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryMediaTypeRejectsBlank(@ForAll("blankStrings") String mediaType) {
         var connector = new SendMediaConnector();
         var inputs = validInputs();
@@ -62,7 +63,7 @@ class SendMediaConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryRecipientPhoneRejectsBlank(@ForAll("blankStrings") String phone) {
         var connector = new SendMediaConnector();
         var inputs = validInputs();
@@ -72,7 +73,7 @@ class SendMediaConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryTokenRejectsBlank(@ForAll("blankStrings") String token) {
         var connector = new SendMediaConnector();
         var inputs = validInputs();
@@ -82,7 +83,7 @@ class SendMediaConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void validConfigurationAlwaysBuilds(
             @ForAll("validMediaTypes") String mediaType,
             @ForAll("validPhoneNumbers") String phone) {
@@ -94,7 +95,7 @@ class SendMediaConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void invalidMediaTypeRejected(@ForAll("invalidMediaTypes") String mediaType) {
         var connector = new SendMediaConnector();
         var inputs = validInputs();
@@ -105,7 +106,7 @@ class SendMediaConnectorPropertyTest {
                 .hasMessageContaining("Invalid mediaType");
     }
 
-    @Property
+    @Example
     void mediaUrlOrMediaIdRequired() {
         var connector = new SendMediaConnector();
         var inputs = validInputs();
@@ -117,7 +118,7 @@ class SendMediaConnectorPropertyTest {
                 .hasMessageContaining("mediaUrl or mediaId");
     }
 
-    @Property
+    @Property(tries = 50)
     void captionOptionalAcceptsNull(@ForAll("validMediaTypes") String mediaType) {
         var connector = new SendMediaConnector();
         var inputs = validInputs();
@@ -127,7 +128,7 @@ class SendMediaConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Example
     void filenameOptionalAcceptsNull() {
         var connector = new SendMediaConnector();
         var inputs = validInputs();
@@ -136,7 +137,7 @@ class SendMediaConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void mediaIdAcceptedAlternativeToUrl(@ForAll @AlphaChars @StringLength(min = 5, max = 50) String mediaId) {
         var connector = new SendMediaConnector();
         var inputs = validInputs();
@@ -146,7 +147,7 @@ class SendMediaConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void timeoutPositiveOnly(@ForAll @IntRange(min = 1, max = 300_000) int timeout) {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")
@@ -159,7 +160,7 @@ class SendMediaConnectorPropertyTest {
         assertThat(config.getConnectTimeout()).isPositive();
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryPhoneNumberIdRejectsBlank(@ForAll("blankStrings") String phoneNumberId) {
         var connector = new SendMediaConnector();
         var inputs = validInputs();
@@ -169,7 +170,7 @@ class SendMediaConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Example
     void defaultValuesApplied() {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")

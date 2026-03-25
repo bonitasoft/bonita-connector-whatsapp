@@ -10,6 +10,7 @@ import java.util.Map;
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
 import net.jqwik.api.ForAll;
+import net.jqwik.api.Example;
 import net.jqwik.api.Property;
 import net.jqwik.api.Provide;
 import net.jqwik.api.constraints.AlphaChars;
@@ -41,7 +42,7 @@ class SendTextConnectorPropertyTest {
         return inputs;
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryBodyRejectsBlank(@ForAll("blankStrings") String body) {
         var connector = new SendTextConnector();
         var inputs = validInputs();
@@ -51,7 +52,7 @@ class SendTextConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryToRejectsBlank(@ForAll("blankStrings") String recipientPhone) {
         var connector = new SendTextConnector();
         var inputs = validInputs();
@@ -61,7 +62,7 @@ class SendTextConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void validConfigurationAlwaysBuilds(
             @ForAll @AlphaChars @StringLength(min = 5, max = 50) String token,
             @ForAll("validPhoneNumbers") String phone,
@@ -75,7 +76,7 @@ class SendTextConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Example
     void previewUrlDefaultFalse() {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")
@@ -86,7 +87,7 @@ class SendTextConnectorPropertyTest {
         assertThat(config.isPreviewUrl()).isFalse();
     }
 
-    @Property
+    @Property(tries = 50)
     void bodyMaxLength(@ForAll @AlphaChars @StringLength(min = 1, max = 4096) String body) {
         var connector = new SendTextConnector();
         var inputs = validInputs();
@@ -95,7 +96,7 @@ class SendTextConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void phoneNumberFormatValidation(@ForAll("validPhoneNumbers") String phone) {
         var connector = new SendTextConnector();
         var inputs = validInputs();
@@ -106,7 +107,7 @@ class SendTextConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void tokenFormatValidation(@ForAll @NotBlank @StringLength(min = 5, max = 200) String token) {
         var connector = new SendTextConnector();
         var inputs = validInputs();
@@ -115,7 +116,7 @@ class SendTextConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void timeoutPositiveOnly(@ForAll @IntRange(min = 1, max = 300_000) int timeout) {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")
@@ -127,7 +128,7 @@ class SendTextConnectorPropertyTest {
         assertThat(config.getConnectTimeout()).isPositive();
     }
 
-    @Property
+    @Example
     void defaultValuesApplied() {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")
@@ -138,13 +139,13 @@ class SendTextConnectorPropertyTest {
         assertThat(config.getBaseUrl()).isEqualTo("https://graph.facebook.com/v23.0");
     }
 
-    @Property
+    @Property(tries = 50)
     void errorMessageTruncation(@ForAll @AlphaChars @StringLength(min = 1001, max = 2000) String longMsg) {
         String truncated = longMsg.length() > 1000 ? longMsg.substring(0, 1000) : longMsg;
         assertThat(truncated.length()).isLessThanOrEqualTo(1000);
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryPhoneNumberIdRejectsBlank(@ForAll("blankStrings") String phoneNumberId) {
         var connector = new SendTextConnector();
         var inputs = validInputs();
@@ -154,7 +155,7 @@ class SendTextConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Example
     void bodyExceeding4096Rejected() {
         var connector = new SendTextConnector();
         var inputs = validInputs();

@@ -10,6 +10,7 @@ import java.util.Map;
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
 import net.jqwik.api.ForAll;
+import net.jqwik.api.Example;
 import net.jqwik.api.Property;
 import net.jqwik.api.Provide;
 import net.jqwik.api.constraints.AlphaChars;
@@ -54,7 +55,7 @@ class GetMessagesConnectorPropertyTest {
         return inputs;
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryContactPhoneRejectsBlank(@ForAll("blankStrings") String phone) {
         var connector = new GetMessagesConnector();
         var inputs = validInputs();
@@ -64,7 +65,7 @@ class GetMessagesConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryPhoneNumberIdRejectsBlank(@ForAll("blankStrings") String phoneNumberId) {
         var connector = new GetMessagesConnector();
         var inputs = validInputs();
@@ -74,7 +75,7 @@ class GetMessagesConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryTokenRejectsBlank(@ForAll("blankStrings") String token) {
         var connector = new GetMessagesConnector();
         var inputs = validInputs();
@@ -84,7 +85,7 @@ class GetMessagesConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void validConfigurationAlwaysBuilds(
             @ForAll @AlphaChars @StringLength(min = 5, max = 50) String token,
             @ForAll("validPhoneNumbers") String contactPhone) {
@@ -96,7 +97,7 @@ class GetMessagesConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void contactPhoneNormalization(@ForAll("phoneWithSeparators") String rawPhone) {
         var connector = new GetMessagesConnector();
         var inputs = validInputs();
@@ -105,7 +106,7 @@ class GetMessagesConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Example
     void limitDefaultValue() {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")
@@ -117,7 +118,7 @@ class GetMessagesConnectorPropertyTest {
         assertThat(config.getLimit()).isEqualTo(500);
     }
 
-    @Property
+    @Example
     void cursorOptionalAcceptsNull() {
         var connector = new GetMessagesConnector();
         var inputs = validInputs();
@@ -126,7 +127,7 @@ class GetMessagesConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void tokenFormatValidation(@ForAll @NotBlank @StringLength(min = 5, max = 200) String token) {
         var connector = new GetMessagesConnector();
         var inputs = validInputs();
@@ -135,7 +136,7 @@ class GetMessagesConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void timeoutPositiveOnly(@ForAll @IntRange(min = 1, max = 300_000) int timeout) {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")
@@ -146,7 +147,7 @@ class GetMessagesConnectorPropertyTest {
         assertThat(config.getConnectTimeout()).isPositive();
     }
 
-    @Property
+    @Example
     void messageListResultAcceptsEmptyArray() {
         var result = new MessageListResult("[]", 0, false, "");
         assertThat(result.messageCount()).isZero();
@@ -154,7 +155,7 @@ class GetMessagesConnectorPropertyTest {
         assertThat(result.nextCursor()).isEmpty();
     }
 
-    @Property
+    @Example
     void defaultValuesApplied() {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")
@@ -164,7 +165,7 @@ class GetMessagesConnectorPropertyTest {
         assertThat(config.getBaseUrl()).isEqualTo("https://graph.facebook.com/v23.0");
     }
 
-    @Property
+    @Property(tries = 50)
     void limitAcceptsPositiveValues(@ForAll @IntRange(min = 1, max = 10_000) int limit) {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")

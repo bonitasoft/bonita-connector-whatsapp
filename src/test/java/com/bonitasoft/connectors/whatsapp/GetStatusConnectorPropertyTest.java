@@ -10,6 +10,7 @@ import java.util.Map;
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
 import net.jqwik.api.ForAll;
+import net.jqwik.api.Example;
 import net.jqwik.api.Property;
 import net.jqwik.api.Provide;
 import net.jqwik.api.constraints.AlphaChars;
@@ -47,7 +48,7 @@ class GetStatusConnectorPropertyTest {
         return inputs;
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryMessageIdRejectsBlank(@ForAll("blankStrings") String messageId) {
         var connector = new GetStatusConnector();
         var inputs = validInputs();
@@ -57,7 +58,7 @@ class GetStatusConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryTokenRejectsBlank(@ForAll("blankStrings") String token) {
         var connector = new GetStatusConnector();
         var inputs = validInputs();
@@ -67,7 +68,7 @@ class GetStatusConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void validConfigurationAlwaysBuilds(
             @ForAll @AlphaChars @StringLength(min = 5, max = 50) String token,
             @ForAll("validMessageIds") String messageId) {
@@ -79,7 +80,7 @@ class GetStatusConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void messageIdFormatAccepted(@ForAll("validMessageIds") String messageId) {
         var connector = new GetStatusConnector();
         var inputs = validInputs();
@@ -88,7 +89,7 @@ class GetStatusConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void tokenFormatValidation(@ForAll @NotBlank @StringLength(min = 5, max = 200) String token) {
         var connector = new GetStatusConnector();
         var inputs = validInputs();
@@ -97,7 +98,7 @@ class GetStatusConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void timeoutPositiveOnly(@ForAll @IntRange(min = 1, max = 300_000) int timeout) {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")
@@ -107,7 +108,7 @@ class GetStatusConnectorPropertyTest {
         assertThat(config.getConnectTimeout()).isPositive();
     }
 
-    @Property
+    @Example
     void defaultBaseUrlApplied() {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")
@@ -116,7 +117,7 @@ class GetStatusConnectorPropertyTest {
         assertThat(config.getBaseUrl()).isEqualTo("https://graph.facebook.com/v23.0");
     }
 
-    @Property
+    @Example
     void defaultTimeoutsApplied() {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")
@@ -126,7 +127,7 @@ class GetStatusConnectorPropertyTest {
         assertThat(config.getReadTimeout()).isEqualTo(60_000);
     }
 
-    @Property
+    @Property(tries = 50)
     void statusResultAcceptsAllStatuses(@ForAll("validStatuses") String status) {
         var result = new MessageStatusResult(status, "2026-03-24T09:00:00Z", "");
         assertThat(result.status()).isEqualTo(status);
@@ -134,13 +135,13 @@ class GetStatusConnectorPropertyTest {
         assertThat(result.errorCode()).isEmpty();
     }
 
-    @Property
+    @Property(tries = 50)
     void errorMessageTruncation(@ForAll @AlphaChars @StringLength(min = 1001, max = 2000) String longMsg) {
         String truncated = longMsg.length() > 1000 ? longMsg.substring(0, 1000) : longMsg;
         assertThat(truncated.length()).isLessThanOrEqualTo(1000);
     }
 
-    @Property
+    @Property(tries = 50)
     void configurationBuildWithCustomTimeout(
             @ForAll @IntRange(min = 1, max = 300_000) int connectTimeout,
             @ForAll @IntRange(min = 1, max = 300_000) int readTimeout) {

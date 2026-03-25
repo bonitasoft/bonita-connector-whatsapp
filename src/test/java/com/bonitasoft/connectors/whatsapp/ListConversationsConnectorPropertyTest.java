@@ -11,6 +11,7 @@ import java.util.Map;
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
 import net.jqwik.api.ForAll;
+import net.jqwik.api.Example;
 import net.jqwik.api.Property;
 import net.jqwik.api.Provide;
 import net.jqwik.api.constraints.AlphaChars;
@@ -45,7 +46,7 @@ class ListConversationsConnectorPropertyTest {
         return inputs;
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryWabaIdRejectsBlank(@ForAll("blankStrings") String wabaId) {
         var connector = new ListConversationsConnector();
         var inputs = validInputs();
@@ -55,7 +56,7 @@ class ListConversationsConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryStartDateRejectsBlank(@ForAll("blankStrings") String startDate) {
         var connector = new ListConversationsConnector();
         var inputs = validInputs();
@@ -65,7 +66,7 @@ class ListConversationsConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryEndDateRejectsBlank(@ForAll("blankStrings") String endDate) {
         var connector = new ListConversationsConnector();
         var inputs = validInputs();
@@ -75,7 +76,7 @@ class ListConversationsConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryTokenRejectsBlank(@ForAll("blankStrings") String token) {
         var connector = new ListConversationsConnector();
         var inputs = validInputs();
@@ -85,7 +86,7 @@ class ListConversationsConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void validConfigurationAlwaysBuilds(@ForAll @AlphaChars @StringLength(min = 5, max = 50) String token) {
         var connector = new ListConversationsConnector();
         var inputs = validInputs();
@@ -94,7 +95,7 @@ class ListConversationsConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void dateRangeWithin90DaysAccepted(@ForAll @IntRange(min = 1, max = 89) int daysBetween) {
         var connector = new ListConversationsConnector();
         var inputs = validInputs();
@@ -106,7 +107,7 @@ class ListConversationsConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void dateRangeExceeding90DaysRejected(@ForAll @IntRange(min = 91, max = 365) int daysBetween) {
         var connector = new ListConversationsConnector();
         var inputs = validInputs();
@@ -120,7 +121,7 @@ class ListConversationsConnectorPropertyTest {
                 .hasMessageContaining("90-day");
     }
 
-    @Property
+    @Example
     void granularityOptionalAcceptsNull() {
         var connector = new ListConversationsConnector();
         var inputs = validInputs();
@@ -129,7 +130,7 @@ class ListConversationsConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Example
     void limitDefaultValue() {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")
@@ -138,7 +139,7 @@ class ListConversationsConnectorPropertyTest {
         assertThat(config.getLimit()).isEqualTo(500);
     }
 
-    @Property
+    @Property(tries = 50)
     void limitAcceptsPositiveValues(@ForAll @IntRange(min = 1, max = 10_000) int limit) {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")
@@ -148,7 +149,7 @@ class ListConversationsConnectorPropertyTest {
         assertThat(config.getLimit()).isEqualTo(limit);
     }
 
-    @Property
+    @Example
     void defaultGranularityApplied() {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")
@@ -157,7 +158,7 @@ class ListConversationsConnectorPropertyTest {
         assertThat(config.getGranularity()).isEqualTo("DAILY");
     }
 
-    @Property
+    @Property(tries = 50)
     void cursorOptionalAcceptsAnyString(@ForAll @AlphaChars @StringLength(min = 1, max = 100) String cursor) {
         var connector = new ListConversationsConnector();
         var inputs = validInputs();

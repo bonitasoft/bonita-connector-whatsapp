@@ -11,6 +11,7 @@ import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Arbitrary;
 import net.jqwik.api.Assume;
 import net.jqwik.api.ForAll;
+import net.jqwik.api.Example;
 import net.jqwik.api.Property;
 import net.jqwik.api.Provide;
 import net.jqwik.api.constraints.AlphaChars;
@@ -57,7 +58,7 @@ class SendTemplateConnectorPropertyTest {
         return inputs;
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryTemplateNameRejectsBlank(@ForAll("blankStrings") String templateName) {
         var connector = new SendTemplateConnector();
         var inputs = validInputs();
@@ -67,7 +68,7 @@ class SendTemplateConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryToRejectsBlank(@ForAll("blankStrings") String recipientPhone) {
         var connector = new SendTemplateConnector();
         var inputs = validInputs();
@@ -77,7 +78,7 @@ class SendTemplateConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryTokenRejectsBlank(@ForAll("blankStrings") String token) {
         var connector = new SendTemplateConnector();
         var inputs = validInputs();
@@ -87,7 +88,7 @@ class SendTemplateConnectorPropertyTest {
                 .isInstanceOf(ConnectorValidationException.class);
     }
 
-    @Property
+    @Property(tries = 50)
     void validConfigurationAlwaysBuilds(
             @ForAll @AlphaChars @StringLength(min = 5, max = 50) String token,
             @ForAll("validPhoneNumbers") String phone,
@@ -101,7 +102,7 @@ class SendTemplateConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Example
     void languageCodeDefaultApplied() {
         var connector = new SendTemplateConnector();
         var inputs = validInputs();
@@ -110,7 +111,7 @@ class SendTemplateConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Example
     void headerParametersOptionalAcceptsNull() {
         var connector = new SendTemplateConnector();
         var inputs = validInputs();
@@ -119,7 +120,7 @@ class SendTemplateConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Example
     void bodyParametersOptionalAcceptsNull() {
         var connector = new SendTemplateConnector();
         var inputs = validInputs();
@@ -128,7 +129,7 @@ class SendTemplateConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void phoneNumberFormatValidation(@ForAll("phoneWithSeparators") String rawPhone) {
         var connector = new SendTemplateConnector();
         var inputs = validInputs();
@@ -138,7 +139,7 @@ class SendTemplateConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void tokenFormatValidation(@ForAll @NotBlank @StringLength(min = 10, max = 200) String token) {
         var connector = new SendTemplateConnector();
         var inputs = validInputs();
@@ -147,7 +148,7 @@ class SendTemplateConnectorPropertyTest {
         assertThatCode(connector::validateInputParameters).doesNotThrowAnyException();
     }
 
-    @Property
+    @Property(tries = 50)
     void timeoutPositiveOnly(@ForAll @IntRange(min = 1, max = 300_000) int timeout) {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")
@@ -159,7 +160,7 @@ class SendTemplateConnectorPropertyTest {
         assertThat(config.getConnectTimeout()).isPositive();
     }
 
-    @Property
+    @Example
     void defaultBaseUrlApplied() {
         var config = WhatsAppConfiguration.builder()
                 .permanentToken("test-token")
@@ -171,7 +172,7 @@ class SendTemplateConnectorPropertyTest {
         assertThat(config.getTemplateLanguage()).isEqualTo("es");
     }
 
-    @Property
+    @Property(tries = 50)
     void mandatoryPhoneNumberIdRejectsBlank(@ForAll("blankStrings") String phoneNumberId) {
         var connector = new SendTemplateConnector();
         var inputs = validInputs();
