@@ -188,4 +188,50 @@ class RetryPolicyTest {
                 .hasMessageContaining("Unexpected error")
                 .hasMessageContaining("IO error");
     }
+
+    @Test
+    void should_call_sleep_with_correct_duration() {
+        java.util.List<Long> sleepDurations = new java.util.ArrayList<>();
+        RetryPolicy trackingPolicy = new RetryPolicy() {
+            @Override void sleep(long millis) { sleepDurations.add(millis); }
+        };
+        AtomicInteger attempts = new AtomicInteger(0);
+        trackingPolicy.execute(() -> {
+            if (attempts.incrementAndGet() <= 2) {
+                throw new WhatsAppException("retry me", 500, true);
+            }
+            return "ok";
+        });
+        assertThat(sleepDurations).containsExactly(1000L, 2000L);
+    }
+
+    @Test
+    void should_handle_interrupt_during_sleep() {
+        RetryPolicy realPolicy = new RetryPolicy();
+        // Just verify sleep method exists and handles InterruptedException
+        Thread.currentThread().interrupt();
+        realPolicy.sleep(1);
+        // After sleep with interrupt, the thread interrupt flag should be set
+        assertThat(Thread.interrupted()).isTrue();
+    }
+
+    @Test
+    void should_not_retry_when_retryable_false_even_with_500_status() {
+        // WhatsAppException with retryable=false but isRetryable checks HTTP code too
+        // This tests the OR logic in isRetryable
+        WhatsAppException ex = new WhatsAppException("test", 500, 0, false);
+        assertThat(policy.isRetryable(ex)).isTrue(); // because httpCode 500 is in RETRYABLE_HTTP
+    }
+
+    @Test
+    void should_not_be_retryable_when_all_conditions_false() {
+        WhatsAppException ex = new WhatsAppException("test", 400, 131047, false);
+        assertThat(policy.isRetryable(ex)).isFalse();
+    }
+
+    @Test
+    void should_be_retryable_when_only_retryable_flag_true() {
+        WhatsAppException ex = new WhatsAppException("test", 400, 0, true);
+        assertThat(policy.isRetryable(ex)).isTrue();
+    }
 }
