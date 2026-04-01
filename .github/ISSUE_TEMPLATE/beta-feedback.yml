@@ -28,6 +28,7 @@ body:
       label: Beta version tested
       description: Which beta version did you test?
       options:
+        - 1.0.0-beta.2
         - 1.0.0-beta.1
     validations:
       required: true
