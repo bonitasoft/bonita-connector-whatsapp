@@ -34,7 +34,9 @@ jobs:
           event-type: new-connector-release
           client-payload: >-
             {
-              "artifactId": "CHANGE_ME",
+              "artifactId": "bonita-connector-whatsapp",
+              "connectorName": "WhatsApp",
               "version": "${{ inputs.version }}",
-              "bonitaMinVersion": "CHANGE_ME"
+              "bonitaMinVersion": "10.2.0",
+              "iconUrl": "https://github.com/bonitasoft/bonita-connector-whatsapp/raw/main/src/main/resources/whatsapp.png"
             }
