@@ -6,7 +6,7 @@
 
     <groupId>org.bonitasoft.connectors</groupId>
     <artifactId>bonita-connector-whatsapp</artifactId>
-    <version>1.0.0-beta.1</version>
+    <version>1.0.0-beta.2</version>
     <packaging>jar</packaging>
 
     <name>Bonita Connector - WhatsApp Business</name>
