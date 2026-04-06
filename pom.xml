@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>Bonita Connector - WhatsApp Business</name>
-    <description>WhatsApp Business Cloud API connector for the Bonita platform — outbound messaging and conversation analytics.</description>
+    <description>WhatsApp Business Cloud API connector for the Bonita platform -- outbound messaging and conversation analytics.</description>
     <url>https://github.com/bonitasoft/bonita-connector-whatsapp</url>
 
     <licenses>
