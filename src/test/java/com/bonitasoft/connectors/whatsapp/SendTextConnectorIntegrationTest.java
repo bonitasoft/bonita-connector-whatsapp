@@ -143,7 +143,7 @@ class SendTextConnectorIntegrationTest {
 
         var connector = new SendTextConnector();
         var inputs = validInputs();
-        inputs.put("messageBody", "Check this out: https://www.bonitasoft.com");
+        inputs.put("messageBody", "Check this out: https://www.ofelia.com");
         inputs.put("previewUrl", true);
         connector.setInputParameters(inputs);
         connector.validateInputParameters();
